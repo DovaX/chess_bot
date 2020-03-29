@@ -40,11 +40,23 @@ class Piece:
         self.type=type_input
         self.player=player
         
-    def move(self,steps,direction): #direction = 1 ahead then clockwise to 8
-        
+    def move(self,steps,direction): #direction = 1 ahead then clockwise to 8        
         move_mouse_in_grid(self.row,self.col,self.player.number)
-        drag_mouse(1,0)
-        self.row+=1
+        if direction in [1,2,8]:
+            base_rows=1
+        elif direction in [3,7]:
+            base_rows=0
+        else:
+            base_rows=-1
+        if direction in [2,3,4]:
+            base_cols=1
+        elif direction in [1,5]:
+            base_cols=0
+        else:
+            base_cols=-1
+        drag_mouse(base_rows*steps,base_cols*steps)
+        self.row+=base_rows*steps
+        self.col+=base_cols*steps
 
 class Player:
     def __init__(self,number):
@@ -82,16 +94,37 @@ def gui_move_piece():
     else:
         player_on_turn=player2
     piece_index=int(entry1.text.get())
-    player_on_turn.pieces[piece_index].move(1,1)
+    steps=int(entry2.text.get())
+    direction=int(entry3.text.get())
+    player_on_turn.pieces[piece_index].move(steps,direction)
     switch_turns()
     #gui1.move()
-
+    
+    grid=[]
+    for i in range(8):
+        grid.append([])
+        for j in range(8):
+            has_piece=False
+            for piece in player1.pieces:
+                if piece.row==i+1 and piece.col==j+1:
+                    grid[i].append(piece.type)
+                    has_piece=True
+            if not has_piece:
+                grid[i].append("/")
+    print(grid)
+                    
+                
 
 gui1=dg.GUI()
 
 entry1=dg.Entry(gui1.window,1,1)
 
-button1=dg.Button(gui1.window,"Move",gui_move_piece,1,2)
+entry2=dg.Entry(gui1.window,1,2)
+
+entry3=dg.Entry(gui1.window,1,3)
+
+
+button1=dg.Button(gui1.window,"Move",gui_move_piece,1,4)
 
 
 gui1.build_gui()    

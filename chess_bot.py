@@ -34,10 +34,10 @@ def move_mouse_in_grid(row,col,player=1):
         mouse.position=OFFSET_X2+SIZE_X*(col-1),OFFSET_Y2+SIZE_Y*(8-row)
 
 class Piece:
-    def __init__(self,row,col,type_input,player):
+    def __init__(self,row,col,piece_type,player):
         self.row=row
         self.col=col
-        self.type=type_input
+        self.piece_type=piece_type
         self.player=player
         
     def move(self,steps,direction): #direction = 1 ahead then clockwise to 8        
@@ -54,9 +54,26 @@ class Piece:
             base_cols=0
         else:
             base_cols=-1
+            
+        self.validate_move()
         drag_mouse(base_rows*steps,base_cols*steps)
         self.row+=base_rows*steps
         self.col+=base_cols*steps
+        
+    def validate_move(self,grid):
+        if piece_type == 'P':
+            if step == 1 
+                if direction == 1:
+                    return(True)
+                if direction==2:
+                    if grid[self.x+1][self.y+1]=='P': #Todo Add Black (other player's pawn)
+                        return(True)
+                if direction==8:
+                    if grid[self.x+1][self.y-1]=='P': #Todo Add Black (other player's pawn)
+                        return(True)
+            
+        
+        
 
 class Player:
     def __init__(self,number):
@@ -84,6 +101,7 @@ players.append(player1)
 players.append(player2)
 
 
+
 def switch_turns():
     player1.on_turn=player2.on_turn
     player2.on_turn=not player1.on_turn
@@ -107,7 +125,7 @@ def gui_move_piece():
             has_piece=False
             for piece in player1.pieces:
                 if piece.row==i+1 and piece.col==j+1:
-                    grid[i].append(piece.type)
+                    grid[i].append(piece.piece_type)
                     has_piece=True
             if not has_piece:
                 grid[i].append("/")

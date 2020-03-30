@@ -64,8 +64,18 @@ class Window(Rectangle):
                                  [(grid.margin + grid.cell_size[0]) * column + grid.margin + grid.position[0],
                                   (grid.margin + grid.cell_size[1]) * row + grid.margin + grid.position[1],
                                   grid.cell_size[0],
-                                  grid.cell_size[1]])      
-    
+                                  grid.cell_size[1]]) 
+                
+    def select_cell(self,grid,row,col):
+        if row is not None and col is not None:
+            pygame.draw.rect(self.screen,
+                                     c.black,
+                                     [(grid.margin + grid.cell_size[0]) * col + grid.margin + grid.position[0],
+                                      (grid.margin + grid.cell_size[1]) * row + grid.margin + grid.position[1],
+                                      grid.cell_size[0],
+                                      grid.cell_size[1]],2) 
+            
+        
     def draw_label(self,label):
         myfont = pygame.font.SysFont(label.font, label.fontsize)
         lbl = myfont.render(label.text, 1, label.color)
@@ -75,6 +85,15 @@ class Window(Rectangle):
         myfont = pygame.font.SysFont(label.font, label.fontsize)
         lbl = myfont.render(label.text, 1, self.bg_color)
         self.screen.blit(lbl, (label.position[0], label.position[1]))
+    
+class Label(Position):
+    def __init__(self,position,text,color=(0,0,0),font="Cambria",fontsize=10):
+        super().__init__(position)
+        self.text=text
+        self.color=color
+        self.font=font
+        self.fontsize=fontsize
+
     
 class Grid(Rectangle):
     def __init__(self,rows,columns,position=[0,0],cell_size=[20,20],margin=1,colors=[c.white]):
@@ -106,31 +125,33 @@ class Grid(Rectangle):
         row = (click[1]-self.position[1]) // (self.cell_size[1] + self.margin)
         return(row,column)
 
-def initialize_grids(grids):
-    grids.append(Grid(8,8,position=[15,50],cell_size=[60,60],colors=[c.grey,c.darkgreen]))
 
 def main_program_loop(window,clock):
     done = False
     grids=[]
     labels=[]
-    initialize_grids(grids)
-    #labels=initialize_labels(labels)
+    grids=game_mechanics.initialize_grids(grids)
+    labels=game_mechanics.initialize_labels(labels)
     time_fr=0 #1/60 sec
     time=0 #1 sec
     #gameIcon = pygame.image.load('icon.png')
     #window.screen.blit(gameIcon,(10,10))
-    while not done:        
+    selected_row=None
+    selected_col=None
+    while not done:     
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                game_mechanics.evaluate_click(grids,pos)                        
+                selected_row,selected_col=game_mechanics.evaluate_click(grids,pos)
         
         for grid in grids:
             window.draw_grid(grid)
-        #for label in labels:
-        #    window.draw_label(label)                   
+            window.select_cell(grid,selected_row,selected_col)
+        for label in labels:
+            window.draw_label(label)                   
         
         clock.tick(60)
         
@@ -151,4 +172,5 @@ def run():
     pygame.quit()
     
 
-run()
+if __name__=='__main__':
+    run()

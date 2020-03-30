@@ -1,105 +1,115 @@
+import game_engine
+
 def evaluate_click(grids,click):
-    map_grids=[grids[0]]
-    for grid in map_grids:
-        row,column=grid.evaluate_row_column_indices(click)
-        print(row,column)
-        #grid.
+    grid=grids[0]
+    row,col=grid.evaluate_row_column_indices(click)
+    move_or_mark_selected_piece(row,col)
+    return(row,col)
         
+def mark_selected_piece(row,col):
+    for piece in game1.pieces:
+        if piece.row==row and piece.col==col:
+            piece.selected=True
+            print(piece)
+        
+def move_or_mark_selected_piece(row,col):
+    for piece in game1.pieces:
+        if piece.selected==True:
+            piece.row=row
+            piece.col=col
+            piece.selected=False
+            piece.update_piece_label()
+            return #either move or mark
+    mark_selected_piece(row,col)
+            
+
+
 ##################### CHESS Game Mechanics ########################
-        
-        
+    
+
+
+
 
 class Piece:
-    def __init__(self,row,col,piece_type,player):
+    def __init__(self,row,col,owner):
         self.row=row
         self.col=col
-        self.piece_type=piece_type
-        self.player=player
+        self.owner=owner
+        self.selected=False
+        self.init_piece_label()
+        
+    def init_piece_label(self):
+        if self.owner==1:
+            owner_label="White"
+        else:
+            owner_label="Black"
+        piece_name=self.__class__.__name__
+        self.piece_label=game_engine.Label([3+POSITION_X+self.col*(CELL_SIZE_X+MARGIN),30+POSITION_Y+self.row*(CELL_SIZE_Y+MARGIN)],owner_label+" "+piece_name,fontsize=10)
+   
+    def update_piece_label(self):
+        self.piece_label.position=[3+POSITION_X+self.col*(CELL_SIZE_X+MARGIN),30+POSITION_Y+self.row*(CELL_SIZE_Y+MARGIN)]
+        
         
     def move(self,steps,direction): #direction = 1 ahead then clockwise to 8        
-        move_mouse_in_grid(self.row,self.col,self.player.number)
-        if direction in [1,2,8]:
-            base_rows=1
-        elif direction in [3,7]:
-            base_rows=0
-        else:
-            base_rows=-1
+        if direction in [8,1,2]:
+            self.row-=steps
+        elif direction in [4,5,6]:
+            self.row+=steps
         if direction in [2,3,4]:
-            base_cols=1
-        elif direction in [1,5]:
-            base_cols=0
-        else:
-            base_cols=-1
-            
-        self.validate_move()
-        drag_mouse(base_rows*steps,base_cols*steps)
-        self.row+=base_rows*steps
-        self.col+=base_cols*steps
-        
-    def validate_move(self,grid):
-        if piece_type == 'P':
-            if step == 1 
-                if direction == 1:
-                    return(True)
-                if direction==2:
-                    if grid[self.x+1][self.y+1]=='P': #Todo Add Black (other player's pawn)
-                        return(True)
-                if direction==8:
-                    if grid[self.x+1][self.y-1]=='P': #Todo Add Black (other player's pawn)
-                        return(True)
-            
-class Player:
-    def __init__(self,number):
-        self.number=number
-        if self.number==1:
-            self.on_turn=True
-        else:
-            self.on_turn=False
+            self.col+=steps
+        elif direction in [6,7,8]:
+            self.col-=steps
+   
+class Pawn(Piece):
+    pass
+
+class Rook(Piece):
+    pass
+
+class Knight(Piece):
+    pass
+
+class Bishop(Piece):
+    pass
+
+class Queen(Piece):
+    pass
+
+class King(Piece):
+    pass
+
+ 
+
+
+########################## Game initialization ##########################
+
+CELL_SIZE_X=60
+CELL_SIZE_Y=60
+POSITION_X=15
+POSITION_Y=50
+MARGIN=1
+
+class Game:
+    def __init__(self):
+        self.player_on_turn=1
         self.pieces=[]
-        for i in range(1,9):
-            piece=Piece(2,i,"P",self)
-            self.pieces.append(piece)
-            
-        for i in [1,8]:  
-            piece=Piece(1,i,"R",self)
-            self.pieces.append(piece)
+        for i in range(8):
+            self.pieces.append(Pawn(6,i,1))
+                          
+game1=Game()
+                        
+c=game_engine.Col()    
+def initialize_labels(labels):
+    for i,piece in enumerate(game1.pieces):    
+        
+        labels.append(piece.piece_label)    
+    return(labels)
 
-
-player1=Player(1)
-player2=Player(2)
-players=[]
-players.append(player1)
-players.append(player2)
-
-
-
-def switch_turns():
-    player1.on_turn=player2.on_turn
-    player2.on_turn=not player1.on_turn
-    
-def gui_move_piece():
-    if player1.on_turn:    
-        player_on_turn=player1
-    else:
-        player_on_turn=player2
-    piece_index=int(entry1.text.get())
-    steps=int(entry2.text.get())
-    direction=int(entry3.text.get())
-    player_on_turn.pieces[piece_index].move(steps,direction)
-    switch_turns()
-    #gui1.move()
-    
-    grid=[]
-    for i in range(8):
-        grid.append([])
-        for j in range(8):
-            has_piece=False
-            for piece in player1.pieces:
-                if piece.row==i+1 and piece.col==j+1:
-                    grid[i].append(piece.piece_type)
-                    has_piece=True
-            if not has_piece:
-                grid[i].append("/")
-    print(grid)
-                    
-                
+def initialize_grids(grids):
+    grids.append(game_engine.Grid(8,8,position=[POSITION_X,POSITION_Y],cell_size=[CELL_SIZE_X,CELL_SIZE_Y],colors=[c.grey,c.darkgreen]))
+    grid=grids[0]
+    for i in range(len(grid.grid)):
+        for j in range(len(grid.grid)):
+            if i+j%2==1:
+                grid.grid[i][j]==1
+    return(grids)

@@ -2,6 +2,7 @@ import pygame
 import random
 import numpy as np
 import math
+import game_mechanics
 
 class Col:
     """Defines all used colours"""
@@ -46,7 +47,7 @@ class Window(Rectangle):
         
     def initialize_game(self):    
         pygame.init()
-        pygame.display.set_caption("Farmers and woodcutters")
+        pygame.display.set_caption("Chess bot")
         clock=pygame.time.Clock()
         self.screen.fill(self.bg_color)
         #gameIcon = pygame.image.load('icon.png')
@@ -124,7 +125,7 @@ def main_program_loop(window,clock):
                 done = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                #game_mechanics.evaluate_click(grids,pos)                        
+                game_mechanics.evaluate_click(grids,pos)                        
         
         for grid in grids:
             window.draw_grid(grid)

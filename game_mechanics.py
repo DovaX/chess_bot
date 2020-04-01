@@ -117,13 +117,27 @@ class Pawn(Piece):
     #    return(function_wrapper)
 
 class Rook(Piece):
-    pass
+    def adjust_validation(f):
+        @wraps(f)
+        def function_wrapper(instance,row,col):
+            if row==0 or col==0:    
+                return(f(instance,row,col))
+            else:
+                return(False)
+        return(function_wrapper)
 
 class Knight(Piece):
     pass
 
 class Bishop(Piece):
-    pass
+    def adjust_validation(f):
+        @wraps(f)
+        def function_wrapper(instance,row,col):
+            if row+col%2==0:    
+                return(f(instance,row,col))
+            else:
+                return(False)
+        return(function_wrapper)
 
 class Queen(Piece):
     pass

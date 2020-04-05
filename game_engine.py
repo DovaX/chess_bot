@@ -58,6 +58,7 @@ class Window(Rectangle):
         for row in range(grid.rows):
             for column in range(grid.columns):
                 value=grid.grid[row][column]
+                #print(value)
                 color = grid.colors[value]
                 pygame.draw.rect(self.screen,
                                  color,
@@ -130,8 +131,9 @@ def main_program_loop(window,clock):
     done = False
     grids=[]
     labels=[]
+                              
+    game1=game_mechanics.game1
     grids=game_mechanics.initialize_grids(grids)
-    labels=game_mechanics.initialize_labels(labels)
     time_fr=0 #1/60 sec
     time=0 #1 sec
     #gameIcon = pygame.image.load('icon.png')
@@ -150,6 +152,7 @@ def main_program_loop(window,clock):
         for grid in grids:
             window.draw_grid(grid)
             window.select_cell(grid,selected_row,selected_col)
+        labels=[piece.piece_label for piece in game1.pieces]
         for label in labels:
             window.draw_label(label)                   
         

@@ -141,7 +141,7 @@ def main_program_loop(window,clock):
     selected_row=None
     selected_col=None
     while not done:     
-        
+        game1=game_mechanics.game1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -159,14 +159,13 @@ def main_program_loop(window,clock):
         clock.tick(60)
         
         time_fr+=1
-        #if time_fr%5==0:
-            #game_mechanics.update_labels(labels)
+        #if time_fr%60==0:
             #game_mechanics.time_event(grids,time_fr)
         if time_fr%60==0:
             time+=1
             print("time:",time)
                         
-        pygame.display.flip()   
+        pygame.display.flip()
         
 def run():
     window=Window([1600,900])

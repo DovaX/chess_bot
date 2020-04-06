@@ -3,6 +3,10 @@ import game_engine
 from functools import wraps
 import random
 
+
+SCORE=[0,0]
+
+
 def evaluate_click(grids,click):
     grid=grids[0]
     row,col=grid.evaluate_row_column_indices(click)
@@ -86,14 +90,12 @@ class Piece:
                 self.relative_move(row,col)
                 self.update_piece_label()
                 game1.player_on_turn=int(not(bool(game1.player_on_turn-1)))+1
-                print("Player on turn:",game1.player_on_turn)
+                #print("Player on turn:",game1.player_on_turn)
         self.selected=False
            
     def relative_move(self,row,col):
-        print("REL",self.row,self.col)
         self.row+=row
         self.col+=col
-        print("REL",self.row,self.col)
         
     def validate_collisions(self,row,col,test_mode):
         steps=max(abs(row),abs(col),1) #1 to not divide by zero
@@ -110,9 +112,9 @@ class Piece:
                 return(False)
             elif(target_piece is not None and i==steps):
                 if target_piece.owner!=self.owner and game1.player_on_turn==self.owner:
-                    print("KILLER",self)#,"SEARCH MODE",search_mode)
+                    #print("KILLER",self)#,"SEARCH MODE",search_mode)
                     if not test_mode:
-                        print(target_piece,"DIES")
+                        #print(target_piece,"DIES")
                         target_piece.die()
                 else:
                     return(False)
@@ -129,8 +131,8 @@ class Piece:
             
     def validate_correctness(self,row,col,test_mode):
         correct=False
-        print("VALID_RELATIVE_MOVE",self.validate_relative_move(row,col))
-        print("VALID_GRID",self.validate_grid(row,col))
+        #print("VALID_RELATIVE_MOVE",self.validate_relative_move(row,col))
+        #print("VALID_GRID",self.validate_grid(row,col))
         if self.validate_relative_move(row,col) and self.validate_grid(row,col):
             #print("VALID_COLLISION",self.validate_collisions(row,col,test_mode))
             if self.validate_collisions(row,col,test_mode):
@@ -163,7 +165,7 @@ class Pawn(Piece):
                     self.promote()
                 self.update_piece_label()
                 game1.player_on_turn=int(not(bool(game1.player_on_turn-1)))+1
-                print("Player on turn:",game1.player_on_turn)
+                #print("Player on turn:",game1.player_on_turn)
         self.selected=False       
         
     def get_search_space(self):
@@ -254,7 +256,7 @@ class King(Piece):
         if self.moved==False and abs(col)==2 and row==0: #for both players
             valid_right=self.castling(row,col,3)
             valid_left=self.castling(row,col,-4)
-            print(valid_right,valid_left)
+            #print(valid_right,valid_left)
             valid=valid_right or valid_left
         return(valid)
     
@@ -275,7 +277,7 @@ class King(Piece):
     
     def check_tile_for_castling(self,castling,relative_col):
         target_piece=get_piece_on_tile(self.row,self.col+relative_col)
-        if target_piece is None:
+        if target_piece is not None:
             castling=False
         return(castling)
            
@@ -295,7 +297,9 @@ class King(Piece):
         self.moved=True  
         
     def die(self):
+        SCORE[self.owner-1]+=1
         game1.new_game=True
+        
         #super().die()
         
     def get_search_space(self):
@@ -318,6 +322,10 @@ POSITION_X=15
 POSITION_Y=50
 MARGIN=1
 
+import pygame
+import operator
+
+
 class Game:
     def __init__(self):
         self.player_on_turn=1
@@ -336,7 +344,6 @@ class Game:
         for i in [4] :
             self.pieces.append(King(7,i,1))
 
-
         for i in range(8):
             self.pieces.append(Pawn(1,i,2))
         for i in [0,7]:
@@ -349,11 +356,10 @@ class Game:
             self.pieces.append(Queen(0,i,2))
         for i in [4] :
             self.pieces.append(King(0,i,2))
-
     
     def play_turn(self):
 
-        print(self.pieces)
+        #print(self.pieces)
         current_pieces=[x for x in self.pieces if x.owner==self.player_on_turn]
         current_player=self.player_on_turn
         total_search_space=[]
@@ -361,17 +367,15 @@ class Game:
             piece=current_pieces[i]
             search_space=piece.get_search_space()
             for j in range(len(search_space)-1,-1,-1):
-                print("")
                 valid=piece.validate_correctness(search_space[j][0]-piece.row,search_space[j][1]-piece.col,True)
                 if not valid:
                     search_space.pop(j)
             total_search_space.append(search_space)
             #print(len(search_space))
-                
-        
-            
+                           
         #print("TOTAL SEARCH SPACE",len(total_search_space),total_search_space)
-        if self.player_on_turn==2:
+        if self.player_on_turn==2 or self.player_on_turn==1:
+            #pygame.time.delay(1000)
             k=0
             tile_dict={}
             for i in range(len(total_search_space)):
@@ -380,20 +384,65 @@ class Game:
                     k+=1
             #print("TURN",k)
             
-            choice=random.randint(0,k-1)
+            
+            
+            
+            ######### TAKES ENEMY IF POSSIBLE ###########
+            k=0
+            tile_score={}
+            for i in range(len(total_search_space)):
+                for j in range(len(total_search_space[i])): 
+                    k+=1
+                    tile_score[k-1]=0
+                    tile=total_search_space[i][j]
+                    #print("TILE",tile)
+                    target_piece=get_piece_on_tile(tile[0],tile[1])
+                    #print(target_piece)
+                    if target_piece is not None:
+                        #print("PLAYERS",target_piece.owner,self.player_on_turn)
+                        if target_piece.owner!=self.player_on_turn:
+                            if isinstance(target_piece,King):
+                                tile_score[k-1]=200
+                            if isinstance(target_piece,Queen):
+                                tile_score[k-1]=100
+                            if isinstance(target_piece,Bishop):
+                                tile_score[k-1]=30
+                            if isinstance(target_piece,Knight):
+                                tile_score[k-1]=25
+                            if isinstance(target_piece,Rook):
+                                tile_score[k-1]=50
+                            if isinstance(target_piece,Pawn):
+                                tile_score[k-1]=10
+            #print(tile_score)
+            #try:
+                
+            max_k=sorted(tile_score, key=(lambda key:tile_score[key]), reverse=True)[0]
+                #print("MAX_K",max_k)
+                #print(tile_score)
+                #print(tile_dict)
+            #except:
+            #max_k=random.randint(0,k-1)
+                
+             
+            if self.player_on_turn==1:
+                choice=max_k
+            elif self.player_on_turn==2:
+                choice=random.randint(0,k-1)
+            
+            if choice>15:    
+                choice=max_k
+            
             i=tile_dict[choice][0]
             j=tile_dict[choice][1]
             #print(i,j)
             chosen_piece=current_pieces[i]
             chosen_move=total_search_space[i][j]
             
-            print("MOVING",chosen_piece,"TO TILE:",chosen_move)
+            #print("MOVING",chosen_piece,"TO TILE:",chosen_move)
             chosen_piece.try_relative_move(chosen_move[0]-chosen_piece.row,chosen_move[1]-chosen_piece.col)
 
-            
 
 #game1=Game()    
- 
 
 def initialize_game():
     print("NEW GAME")

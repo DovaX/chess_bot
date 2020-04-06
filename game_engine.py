@@ -140,6 +140,8 @@ def main_program_loop(window,clock):
     #window.screen.blit(gameIcon,(10,10))
     selected_row=None
     selected_col=None
+    number_of_turns_list=[]
+    number_of_turns=0
     while not done:     
         game1=game_mechanics.game1
         for event in pygame.event.get():
@@ -159,11 +161,19 @@ def main_program_loop(window,clock):
         clock.tick(60)
         
         time_fr+=1
-        #if time_fr%60==0:
+        if time_fr%1==0:
+            #pass
+            if game1.new_game==False:
+                game1.play_turn()
+                number_of_turns+=1
+            else:
+                number_of_turns_list.append(number_of_turns)
+                number_of_turns=0
+                game_mechanics.initialize_game()
             #game_mechanics.time_event(grids,time_fr)
         if time_fr%60==0:
             time+=1
-            print("time:",time)
+            print("time:",time,"SCORE:",game_mechanics.SCORE,"TURNS:",number_of_turns_list)
                         
         pygame.display.flip()
         

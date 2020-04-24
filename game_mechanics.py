@@ -374,7 +374,7 @@ class Game:
             #print(len(search_space))
                            
         #print("TOTAL SEARCH SPACE",len(total_search_space),total_search_space)
-        if self.player_on_turn==2 or self.player_on_turn==1:
+        if self.player_on_turn==2: #or self.player_on_turn==1:
             #pygame.time.delay(1000)
             k=0
             tile_dict={}
